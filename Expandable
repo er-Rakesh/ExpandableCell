@@ -1,0 +1,62 @@
+About a year ago, I had a client that wanted a creative way to condense groups of information currently displayed in a UITableView. Now I knew of some cases in which Apps have made UITableView sections collapse and expand to satisfy this requirement. This solution was suggested to the client and of course they loved the idea.
+This seemed like a pretty simple development task… until I started to investigate what would be needed to create this functionality programmatically. What I found were complex frameworks, numerous methods and entire custom classes designed to implement this feature. This all seemed way too involved and overly complex given the simplicity of the root functionality.
+Now I was faced with the difficult task of implementing this complex logic or convincing the client that this functionality was not the way to go. Given that the client was now enamored with this functionality, the later was not an option. So, I needed to roll up my selves and make this feature work without having to implement logic that is more complex than the host App.
+Before going any further, a picture is worth a thousand words, so here is what the desired functionality should look like. When the App is launched, all sections are collapsed as shown in Figure 1. Once a user touches one of the sections to expand it, the view will appear as shown in Figure 2.
+
+
+
+
+
+
+           func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+               return 40
+             //  return UITableView.automaticDimension
+           }
+           
+           // 4
+           func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+               let viewHeader = UIView(frame: CGRect(x: 0, y: 0, width: UIScreen.main.bounds.size.width, height: 40))
+            //   viewHeader.backgroundColor = UIColor.darkGray // Changing the header background color to gray
+               viewHeader.backgroundColor = UIColor.blue
+               
+               let button = UIButton(type: .custom)
+                      button.frame = viewHeader.bounds
+                      button.tag = section // Assign section tag to this button
+                      button.addTarget(self, action: #selector(tapSection(sender:)), for: .touchUpInside)
+                     // button.setTitle("Section: \(section)", for: .normal)
+                    button.setTitle("Header: \(section)", for: .normal)
+                      viewHeader.addSubview(button)
+           
+               return viewHeader
+           }
+           
+           // 5
+           func numberOfSections(in tableView: UITableView) -> Int {
+               return arrayHeader.count
+              // return 1
+
+           }
+           
+           func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+               // 6 Change the number of row in section as per your uses
+               // return 4
+               return (self.arrayHeader[section] == 0) ? 0 : 2
+
+           }
+           
+           // 7
+           func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+               let cell = tableView.dequeueReusableCell(withIdentifier: "ExpandCell", for: indexPath)
+             //  cell.textLabel?.text = "section: \(indexPath.section)  row: \(indexPath.row)"
+               cell.textLabel?.text = "Cell"
+               cell.textLabel?.text = "Meenal".uppercased()
+               cell.imageView?.image = UIImage(named: "image")
+               cell.selectionStyle = .none
+               
+               return cell
+           }
+           
+           @objc func tapSection(sender: UIButton) {
+                 self.arrayHeader[sender.tag] = (self.arrayHeader[sender.tag] == 0) ? 1 : 0
+                 self.tableSetting.reloadSections([sender.tag], with: .fade)
+             }
